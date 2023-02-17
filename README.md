@@ -1,2 +1,2 @@
 # player--
-player-- a media player in c++ and qt
+player-- a selfhosted online media like service
