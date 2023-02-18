@@ -1,152 +1,189 @@
-const player = document.querySelector('.player');
-const video = document.querySelector('.video');
-const progressSpan = document.querySelector('.progress-span');
-const progressBar = document.querySelector('.progress-bar');
-const playBtn = document.getElementById('play-btn');
-const volumeIcon = document.getElementById('volume-icon');
-const volumeLine = document.querySelector('.volume-line');
-const volumeBar = document.querySelector('.volume-bar');
-const speed = document.querySelector('.player-speed');
-const currentTime = document.querySelector('.time-elapsed');
-const duration = document.querySelector('.time-duration');
-const fullscreenBtn = document.querySelector('.fullscreen');
+toastr.options = {
+  "closeButton": true,
+  "debug": false,
+  "newestOnTop": true,
+  "progressBar": true,
+  "positionClass": "toast-bottom-left",
+  "preventDuplicates": false,
+  "onclick": null,
+  "showDuration": "300",
+  "hideDuration": "1000",
+  "timeOut": "5000",
+  "extendedTimeOut": "1000",
+  "showEasing": "swing",
+  "hideEasing": "linear",
+  "showMethod": "slideDown",
+  "hideMethod": "slideUp"
+}
 
-//Event Listeners
-playBtn.addEventListener('click', togglePlay);
-video.addEventListener('click', togglePlay);
-video.addEventListener('timeupdate', spanUpdate);
-video.addEventListener('canplay', spanUpdate);
-progressSpan.addEventListener('click', spanTime);
-volumeLine.addEventListener('click', changeVolume);
-volumeIcon.addEventListener('click', toggleMute);
-speed.addEventListener('change', changeSpeed);
-fullscreenBtn.addEventListener('click', toggleFullscreen);
+function logMessage(m, t, ty) {
+  console.log("[LVP]", m)
+  document.querySelector("#log").innerText = `${document.querySelector("#log").innerText}\n[${Math.floor(performance.now()) / 1000}] ${m}`
+  if (t) {
+    toastr[ty](m, t)
+  }
+}
 
+try {
+  function rch(qs, f) {
+    $(qs)[0].addEventListener('click', f);
+  }
 
-function togglePlay() {
-    if (video.paused) {
-        video.play();
-        playBtn.classList.replace('fa-play', 'fa-pause');
-        playBtn.setAttribute('title', 'Pause');
+  var vid = $("#mainvideo")[0]
+  var play = $("#playbutton")[0]
+  var mute = $("#muteButton")[0]
+  var fullVol = $("#fullblastbutton")[0]
+  var statsb = $("#statsbutton")[0]
+  var stats = $("#stats")[0]
+  var config = $("#config")[0]
+  var fs = $("#fullscreen")[0]
+  var speed = $("#speed")[0]
+  $("#controls")[0].style.display = "block";
+
+  function playpause() {
+    if (play.className.includes("fa-pause")) {
+      vid.pause()
     } else {
-        video.pause();
-        displayPlayIcon();
+      vid.play()
     }
-}
-
-function displayPlayIcon() {
-    playBtn.classList.replace('fa-pause', 'fa-play');
-    playBtn.setAttribute('title', 'Play');
-}
-
-video.addEventListener('ended', displayPlayIcon);
-
-
-//
-function showTime(time) {
-    const minutes = Math.floor(time / 60);
-    let seconds = Math.floor(time % 60);
-    seconds = seconds > 9 ? seconds : `0${seconds}`;
-    return `${minutes}: ${seconds}`;
-}
-
-function spanUpdate() {
-    //console.log('currentTime', video.currentTime, 'duration', video.duration);
-    progressBar.style.width = `${(video.currentTime / video.duration) * 100}%`;
-    currentTime.textContent = `${showTime(video.currentTime)} /`;
-    duration.textContent = `${showTime(video.duration)}`;
-
-}
-
-function spanTime(e) {
-    // console.log(e);
-    const newTime = e.offsetX / progressSpan.offsetWidth;
-    progressBar.style.width = `${newTime * 100}%`;
-    video.currentTime = newTime * video.duration;
-}
-let endVolume = 1;
-//Volume
-function changeVolume(e) {
-    let volume = e.offsetX / volumeLine.offsetWidth;
-    //console.log(volume);
-    if (volume < 0.1) {
-        volume = 0;
-    }
-    if (volume > 0.9) {
-        volume = 1;
-    }
-    volumeBar.style.width = `${volume * 100}%`;
-    video.volume = volume;
-
-    volumeIcon.className = '';
-    if (volume > 0.7) {
-        volumeIcon.classList.add('fas', 'fa-volume-up');
-    } else if (volume < 0.7 && volume > 0) {
-        volumeIcon.classList.add('fas', 'fa-volume-down');
-    } else if (volume === 0) {
-        volumeIcon.classList.add('fas', 'fa-volume-off');
-    }
-    endVolume = volume;
-
-
-
-}
-
-//Mute
-function toggleMute() {
-    volumeIcon.className = '';
-    if (video.volume) {
-        endVolume = video.volume;
-        video.volume = 0;
-        volumeIcon.classList.add('fas', 'fa-volume-mute');
-        volumeIcon.setAttribute('title', 'Unmute');
-        volumeBar.style.width = 0;
+  }
+  rch(play, playpause)
+  rch(vid, playpause)
+  rch(statsb, function() {
+    $(config).toggle(400)
+  })
+  rch(mute, function() {
+    vid.volume = 0;
+  })
+  rch(fullVol, function() {
+    vid.volume = 1;
+  })
+  rch(fs, function() {
+    if (!document.querySelector(":fullscreen")) {
+      document.body.requestFullscreen()
     } else {
-        video.volume = endVolume;
-        volumeIcon.classList.add('fas', 'fa-volume-up');
-        volumeIcon.setAttribute('title', 'Mute');
-        volumeBar.style.width = `${endVolume * 100}%`;
-
+      document.exitFullscreen()
     }
-}
-
-function changeSpeed() {
-    // console.log('video playback rate', video.playbackRate);
-    //console.log('selected value', speed.value);
-    video.playbackRate = speed.value;
-
-}
-//fullscreen
-function openFullscreen(elem) {
-    if (elem.requestFullscreen) {
-        elem.requestFullscreen();
-    } else if (elem.webkitRequestFullscreen) {
-        /* Safari */
-        elem.webkitRequestFullscreen();
-    } else if (elem.msRequestFullscreen) {
-        /* IE11 */
-        elem.msRequestFullscreen();
+    
+  })
+  var droppedFrames = 0
+  var shownWarning = false
+  setInterval(function() {
+    if (vid.paused) {
+      play.className = "icon fa fa-play"
+    } else {
+      play.className = "icon fa fa-pause"
     }
-    video.classList.add('video-fullscreen');
-}
-
-/* Close fullscreen */
-function closeFullscreen() {
-    if (document.exitFullscreen) {
-        document.exitFullscreen();
-    } else if (document.webkitExitFullscreen) {
-        /* Safari */
-        document.webkitExitFullscreen();
-    } else if (document.msExitFullscreen) {
-        /* IE11 */
-        document.msExitFullscreen();
+    if (document.querySelector(":fullscreen")) {
+      fs.className = "icon fa fa-compress"
+    } else {
+      fs.className = "icon fa fa-expand"
     }
-    video.classList.remove('video-fullscreen');
-}
+    
+    $("#src")[0].innerText = vid.currentSrc
+    $("#res")[0].innerText = `${vid.videoWidth}x${vid.videoHeight}`
+    var qual = vid.getVideoPlaybackQuality()
+    $("#framesDropped")[0].innerText = `${qual.droppedVideoFrames} ${droppedFramesRate}/s`
+    $("#framesCorrupt")[0].innerText = `${qual.corruptedVideoFrames} ${corruptedFramesRate}/s`
+    var newDroppedFrames = (qual.corruptedVideoFrames + qual.droppedVideoFrames)
+    if (newDroppedFrames > 100 && !shownWarning && newDroppedFrames > droppedFrames) {
+      logMessage("We're having some playback troubles. Consider lowing the video resolution.", "Playback isn't running smooth.", "warning")
+      shownWarning = true
+    }
+    droppedFrames = qual.corruptedVideoFrames + qual.droppedVideoFrames
+    $("#frames")[0].innerText = `${qual.totalVideoFrames - droppedFrames} ${frameRate} fps`
 
-let fullscreen = false;
+    $("#volume")[0].value = vid.volume
+    $("#progress")[0].value = vid.currentTime
+    $("#progress")[0].max = vid.duration
+    
+    vid.playbackRate = parseInt(speed.value) / 10
+  }, 15)
 
-function toggleFullscreen() {
-    !fullscreen ? openFullscreen(player) : closeFullscreen();
-    fullscreen = !fullscreen;
+  var isScrubbing = false
+  $("#progress")[0].onmousedown = function(mE) {
+    var width = mE.target.clientWidth
+    var click = mE.offsetX
+    var pcnt = click / width
+    vid.currentTime = vid.duration * pcnt
+    isScrubbing = true
+  }
+  $("#progress")[0].onmouseup = function(mE) {
+    isScrubbing = false
+  }
+  $("#progress")[0].onmousemove = function(mE) {
+    if (isScrubbing) {
+      var width = mE.target.clientWidth
+      var click = mE.offsetX
+      var pcnt = click / width
+      vid.currentTime = vid.duration * pcnt
+    }
+  }
+  
+  var volumeChanging = false
+  $("#volume")[0].onmousedown = function(mE) {
+    var width = mE.target.clientWidth
+    var click = mE.offsetX
+    var pcnt = click / width
+    vid.volume = pcnt
+    volumeChanging = true
+  }
+  $("#volume")[0].onmousemove = function(mE) {
+    if (volumeChanging) {
+      var width = mE.target.clientWidth
+      var click = mE.offsetX
+      var pcnt = click / width
+      vid.volume = pcnt
+    }
+  }
+  $("#volume")[0].onmouseup = function() {
+    volumeChanging = false
+  }
+
+  var oldDroppedFrames = 0
+  var oldCorruptedFrames = 0
+  var oldFrames = 0
+  var droppedFramesRate = 0
+  var corruptedFramesRate = 0
+  var frameRate = 0
+  setInterval(function() {
+    var qual = vid.getVideoPlaybackQuality()
+    droppedFramesRate = (qual.droppedVideoFrames - oldDroppedFrames) * 4
+    corruptedFramesRate = (qual.corruptedVideoFrames - oldCorruptedFrames) * 4
+    var renderedFrames = qual.totalVideoFrames - (qual.corruptedVideoFrames + qual.droppedVideoFrames)
+    frameRate = (renderedFrames - oldFrames) * 4
+    oldDroppedFrames = qual.droppedVideoFrames
+    oldCorruptedFrames = qual.corruptedVideoFrames
+    oldFrames = renderedFrames
+    
+    
+    
+  }, 250)
+  
+  updateQual = function() {
+    var oldTime = vid.currentTime
+    vid.src = document.querySelector("#qualitySelect").value
+    vid.currentTime = oldTime
+    vid.play()
+  }
+  vid.src = document.querySelector("#qualitySelect").value
+
+  function hideControls() {
+    $("#controls")[0].style.bottom = "-2em";
+  }
+
+  function showControls() {
+    $("#controls")[0].style.bottom = "0em";
+  }
+  document.querySelector("#lvpContainer").onmouseenter = showControls;
+  document.querySelector("#lvpContainer").onmouseleave = hideControls
+  vid.controls = false;
+  logMessage("Loaded successfully")
+} catch (e) {
+  try {
+    $("#stats").show(400)
+    logMessage(e.toString(),"Fatal error!","error")
+  } catch (x) {
+    alert(e)
+  }
 }
