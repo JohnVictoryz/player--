@@ -12,3 +12,8 @@ background-color: black;
 p {
 color: blue;
 }
+.logo {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
