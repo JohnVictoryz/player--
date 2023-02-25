@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Nyan Cat - player--</title>
+  <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.8.1/css/all.css'>
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.1/css/bulma.min.css'>
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css'><link rel="stylesheet" href="./video.css">
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<div id="lvpContainer">
+    <video src="" class="isshowingall is-foreground" id="mainvideo" controls autoplay></video>
+    <div id="controls">
+        <a class="icon fa fa-play" id="playbutton"></a>
+        <progress id="progress" class="progress is-danger" minimum="0" maximum="100" value="0"></progress>
+        <a class="icon fa fa-volume-off" id="muteButton"></a>
+        <progress id="volume" class="progress is-danger" minimum="0" maximum="100" value="100"></progress>
+        <a class="icon fa fa-volume-up" id="fullblastbutton"></a>
+        <a class="icon fa fa-cog" id="statsbutton"></a>
+        <a class="icon fa fa-expand" id="fullscreen"></a>
+    </div>
+    <div id="config">
+        <span id="configcontainer">
+          <b>Video quality</b><br>
+          <div class="select is-danger">
+            <select class="select is-danger" id="qualitySelect" onchange="updateQual()">
+              <option value="../media/Nyan_Cat.mp4">360p@24fps</option>
+              <option value="../media/Nyan_Cat4k30fps.mp4">4k@30fps</option>
+            </select>
+          </div>
+          <br>
+          <b>Speed</b>
+          <input type="range" id="speed" max="160" min="0" value="10"></input>
+          <br>
+      <button onclick="$(stats).toggle(400)" class="button is-danger">Show stats for nerds</button>
+      </span>
+    </div>
+    <div id="stats">
+        <span id="statscontainer">
+      <b>Frames Corrupt:</b> <span id="framesCorrupt">0</span><br>
+        <b>Frames Dropped:</b> <span id="framesDropped">0</span><br>
+        <b>Frames Rendered:</b> <span id="frames">0</span><br>
+        <b>Resolution:</b> <span id="res">0x0</span><br>
+        <b>Source:</b> <span id="src">/video.mp4</span><br>
+        <br>
+        <b>Log:</b>
+        <span id="log"></span><br>
+        </span>
+    </div>
+</div>
+<!-- partial -->
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js'></script><script  src="./video.js"></script>
+
+</body>
+</html>

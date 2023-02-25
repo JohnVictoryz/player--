@@ -1,0 +1,19 @@
+h1 {
+color: blue;
+text-align: center;
+}
+button {
+color: blue;
+text-align: center;
+}
+body { 
+background-color: black;
+}
+p {
+color: blue;
+}
+.logo {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
